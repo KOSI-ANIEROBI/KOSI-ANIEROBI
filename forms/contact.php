@@ -1,47 +1,36 @@
 <?php
-  /**
-  * Requires the "PHP Email Form" library
-  * The "PHP Email Form" library is available only in the pro version of the template
-  * The library should be uploaded to: vendor/php-email-form/php-email-form.php
-  * For more info and help: https://bootstrapmade.com/php-email-form/
-  */
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-  // Replace contact@example.com with your real receiving email address
-$receiving_email_address = 'arejoicekosi@gmail.com';
+require 'vendor/autoload.php'; // If using Composer
 
+$mail = new PHPMailer(true);
 
-  if( file_exists($php_email_form = '../assets/vendor/php-email-form/php-email-form.php' )) {
-    include( $php_email_form );
-  } else {
-    die( 'Unable to load the "PHP Email Form" Library!');
-  }
+try {
+    // Server settings
+    $mail->isSMTP();
+    $mail->Host       = 'smtp.gmail.com';
+    $mail->SMTPAuth   = true;
+    $mail->Username   = 'arejoicekosi@gmail.com';
+    $mail->Password   = 'your-app-password';
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port       = 587;
 
-  $contact = new PHP_Email_Form;
-  $contact->ajax = true;
-  
-  $contact->to = $receiving_email_address;
-  $contact->from_name = $_POST['name'];
-  $contact->from_email = $_POST['email'];
-  $contact->subject = $_POST['subject'];
+    // Recipients
+    $mail->setFrom($_POST['email'], $_POST['name']);
+    $mail->addAddress('arejoicekosi@gmail.com');
+    $mail->addReplyTo($_POST['email'], $_POST['name']);
 
-  // Uncomment below code if you want to use SMTP to send emails. You need to enter your correct SMTP credentials
-  /*
-  $contact->smtp = array(
-    'host' => 'example.com',
-    'username' => 'example',
-    'password' => 'pass',
-    'port' => '587'
-  );
-  */
+    // Content
+    $mail->isHTML(false);
+    $mail->Subject = $_POST['subject'];
+    $mail->Body    = "From: " . $_POST['name'] . "\n";
+    $mail->Body   .= "Email: " . $_POST['email'] . "\n\n";
+    $mail->Body   .= "Message:\n" . $_POST['message'];
 
-  $contact->add_message( $_POST['name'], 'From');
-  $contact->add_message( $_POST['email'], 'Email');
-  $contact->add_message( $_POST['message'], 'Message', 10);
-
- if ($contact->send()) {
-  echo 'OK'; // ✅ So the JavaScript knows it succeeded
-} else {
-  echo 'Message failed to send.';
+    $mail->send();
+    echo 'OK';
+} catch (Exception $e) {
+    echo "Message could not be sent. Error: {$mail->ErrorInfo}";
 }
-
 ?>
